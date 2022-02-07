@@ -35,31 +35,29 @@
     "listener"
   ],
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-core": "^6.13.2",
-    "babel-loader": "^6.2.4",
-    "babel-plugin-transform-export-extensions": "^6.8.0",
-    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-transform-export-extensions": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.13.2",
-    "babel-preset-stage-2": "^6.13.0",
-    "benchmark": "^2.1.1",
-    "eslint": "^3.2.2",
-    "eslint-config-airbnb": "^10.0.0",
-    "eslint-loader": "^1.5.0",
-    "eslint-plugin-import": "^1.13.0",
-    "eslint-plugin-jsx-a11y": "^2.1.0",
-    "eslint-plugin-react": "^6.0.0",
-    "expect": "^1.20.2",
-    "mocha": "^3.0.0",
-    "webpack": "^1.13.1"
+    "babel-preset-stage-2": "^6.24.1",
+    "benchmark": "^2.1.4",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "expect": "^27.5.0",
+    "mocha": "^9.2.0",
+    "webpack": "^5.68.0"
   },
   "engines": {
     "node": ">=4"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --require babel-core/register ./test/index.js",
     "start": "npm i eventemitter2 event-emitter && babel-node --presets es2015 ./benchmark/single.js"
   }
 }
