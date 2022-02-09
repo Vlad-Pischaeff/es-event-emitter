@@ -1,5 +1,8 @@
-/* global WeakMap */
+const MANY = 0;
+const ONCE = 1;
+const DONE = 2;
 
+/* global WeakMap */
 const privateMap = new WeakMap();
 
 // For making private properties.
@@ -33,8 +36,9 @@ export default class EventEmitter {
 
     self._events = new Set();
     self._console = localConsole;
-    self._maxListeners = maxListeners === null ?
-      null : parseInt(maxListeners, 10);
+    self._maxListeners = maxListeners === null 
+      ? null 
+      : parseInt(maxListeners, 10);
 
     return this;
   }
@@ -46,15 +50,20 @@ export default class EventEmitter {
    * @param {function} callback
    * @param {object|null} context - In than context will be called callback.
    * @param {number} weight - Using for sorting callbacks calls.
-   *
+   * @param {number} count - Using for how many times callback calls.
+   * 
    * @return {this}
    */
-  _addCallback(eventName, callback, context, weight) {
+  _addCallback(eventName, callback, context, weight, count) {
+    if (context) {
+      callback = callback.bind(context);
+    }
+    
     this._getCallbacks(eventName)
       .push({
         callback,
-        context,
-        weight
+        weight,
+        count
       });
 
     // @todo instead of sorting insert to right place in Array.
@@ -88,9 +97,10 @@ export default class EventEmitter {
    * @return {number|null}
    */
   _getCallbackIndex(eventName, callback) {
-    return this._has(eventName) ?
-      this._getCallbacks(eventName)
-        .findIndex(element => element.callback === callback) : -1;
+    return this._has(eventName) 
+      ? this._getCallbacks(eventName)
+          .findIndex(element => element.callback === callback) 
+      : -1;
   }
 
   /**
@@ -116,8 +126,9 @@ export default class EventEmitter {
    */
   _callbackIsExists(eventName, callback, context) {
     const callbackInd = this._getCallbackIndex(eventName, callback);
-    const activeCallback = callbackInd !== -1 ?
-      this._getCallbacks(eventName)[callbackInd] : void 0;
+    const activeCallback = callbackInd !== -1 
+      ? this._getCallbacks(eventName)[callbackInd] 
+      : void 0;
 
     return (callbackInd !== -1 && activeCallback &&
       activeCallback.context === context);
@@ -131,7 +142,10 @@ export default class EventEmitter {
    * @return {bool}
    */
   _has(eventName) {
-    return internal(this)._events.has(eventName);
+    // return internal(this)._events.has(eventName);
+    return _callbacks[eventName]
+      ? true
+      : false;
   }
 
   /**
@@ -141,10 +155,11 @@ export default class EventEmitter {
    * @param {function} callback
    * @param {object|null} context - In than context will be called callback.
    * @param {number} weight - Using for sorting callbacks calls.
+   * @param {number} count - Using for how many times callback calls.
    *
    * @return {this}
    */
-  on(eventName, callback, context = null, weight = 1) {
+  on(eventName, callback, context = null, weight = 1, count = MANY) {
     /* eslint no-unused-vars: 0 */
     const self = internal(this);
 
@@ -171,7 +186,7 @@ export default class EventEmitter {
       }
     }
 
-    this._addCallback(...arguments);
+    this._addCallback(eventName, callback, context, weight, count);
 
     return this;
   }
@@ -183,16 +198,12 @@ export default class EventEmitter {
    * @param {function} callback
    * @param {object|null} context - In than context will be called callback.
    * @param {number} weight - Using for sorting callbacks calls.
+   * @param {number} count - Using for how many times callback calls.
    *
    * @return {this}
    */
-  once(eventName, callback, context = null, weight = 1) {
-    const onceCallback = (...args) => {
-      this.off(eventName, onceCallback);
-      return callback.call(context, args);
-    };
-
-    return this.on(eventName, onceCallback, context, weight);
+  once(eventName, callback, context = null, weight = 1, count = ONCE) {
+    this.on(eventName, callback, context, weight, count);
   }
 
   /**
@@ -235,48 +246,16 @@ export default class EventEmitter {
    *
    * @return {this}
    */
-  emit(eventName/* , ...args*/) {
-    /*
-      if (this._has(eventName)) {
-        this._getCallbacks(eventName)
-          .forEach(element =>
-            element.callback.call(element.context, args)
-          );
-      }
-    */
-
-    // It works ~3 times faster.
-    const custom = _callbacks[eventName];
-    // Number of callbacks.
-    let i = custom ? custom.length : 0;
-    let len = arguments.length;
-    let args;
-    let current;
-
-    if (i > 0 && len > 1) {
-      args = new Array(len - 1);
-
-      while (len--) {
-        if (len === 1) {
-          // We do not need first argument.
-          break;
-        }
-        args[len] = arguments[len];
-      }
+  emit(eventName, ...args) {
+    if (this._has(eventName)) {
+      this._getCallbacks(eventName)
+        .forEach(element => {
+          if (element.count !== DONE) {
+            element.callback(args);
+            if (element.count === ONCE) element.count = DONE;
+          }
+        });
     }
-
-    while (i--) {
-      current = custom[i];
-
-      if (arguments.length > 1) {
-        current.callback.call(current.context, args);
-      } else {
-        current.callback.call(current.context);
-      }
-    }
-
-    // Just clean it.
-    args = null;
 
     return this;
   }
@@ -302,7 +281,8 @@ export default class EventEmitter {
    *                         or null if event isn't exists.
    */
   listenersNumber(eventName) {
-    return this._has(eventName) ?
-      _callbacks[eventName].length : null;
+    return this._has(eventName) 
+      ? _callbacks[eventName].length 
+      : null;
   }
 }

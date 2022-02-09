@@ -72,7 +72,7 @@ describe('EventEmitter', function() {
       expect(foo).toEqual(3);
     });
 
-    it('3.3: After the second, third triggering event "bar", "foo" should be equal 3 as well', () => {
+    it('3.2: After the second, third triggering event "bar", "foo" should be equal 3 as well', () => {
       EM
         .emit('foo')
         .emit('foo');
@@ -98,7 +98,7 @@ describe('EventEmitter', function() {
       expect(EM.listenersNumber('bar1')).toEqual(null)
     );
 
-    it('5.2: After add event listeners "bar1", numbel of listeners should be 4', () => {
+    it('5.2: After add event listeners "bar1", number of listeners should be 4', () => {
       EM
         .on('bar1', () => 'some response 1')
         .on('bar1', () => 'some response 2')
@@ -106,5 +106,18 @@ describe('EventEmitter', function() {
         .on('bar1', () => 'some response 4');
       expect(EM.listenersNumber('bar1')).toEqual(4);
     });
+  });
+
+  describe('6: context applying', function() {
+    let User = { name: 'John' };
+    let user;
+    
+    EM.on('setUser', function() { user = this.name }, User);
+    EM.emit('setUser');
+
+    it('6.1: After triggering event "user" should be equal John', () => {
+      expect(user).toEqual('John');
+    });
+
   });
 });

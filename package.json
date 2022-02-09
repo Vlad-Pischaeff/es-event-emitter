@@ -59,5 +59,9 @@
   "scripts": {
     "test": "mocha --require babel-core/register ./test/index.js",
     "start": "npm i eventemitter2 event-emitter && babel-node --presets es2015 ./benchmark/single.js"
+  },
+  "dependencies": {
+    "event-emitter": "^0.3.5",
+    "eventemitter2": "^6.4.5"
   }
 }
