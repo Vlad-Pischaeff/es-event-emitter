@@ -57,7 +57,7 @@
     "node": ">=4"
   },
   "scripts": {
-    "test": "mocha --require babel-core/register ./test/index.js",
+    "test": "mocha --require babel-core/register",
     "start": "npm i eventemitter2 event-emitter && babel-node --presets es2015 ./benchmark/single.js"
   },
   "dependencies": {

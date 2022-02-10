@@ -120,4 +120,17 @@ describe('EventEmitter', function() {
     });
 
   });
+
+  describe('7: number of args applying', function() {
+    let arg1, arg2;
+    
+    EM.on('number', (a1, a2) => { arg1 = a1, arg2 = a2 });
+    EM.emit('number', 1, 2);
+
+    it('7.1: After triggering event "number" arg1 should be equal 1, arg2 should be equal 2 ', () => {
+      expect(arg1).toEqual(1);
+      expect(arg2).toEqual(2);
+    });
+
+  });
 });

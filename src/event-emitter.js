@@ -251,7 +251,7 @@ export default class EventEmitter {
       this._getCallbacks(eventName)
         .forEach(element => {
           if (element.count !== DONE) {
-            element.callback(args);
+            element.callback(...args);
             if (element.count === ONCE) element.count = DONE;
           }
         });
